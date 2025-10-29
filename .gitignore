@@ -1,0 +1,77 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+
+# Java class
+*.class
+
+bin/
+gen/
+out/
+release/
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local config
+local.properties
+
+proguard/
+
+# Logs
+*.log
+
+# Android Studio Nav temp
+.navigation/
+
+# Android Studio Cap´s
+captures/
+
+# IntelliJ
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# Keystore
+*.jks
+*.keystore
+
+.externalNativeBuild
+.cxx/
+
+# Google Services
+google-services.json
+
+freeline.py
+freeline/
+freeline_project_description.json
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+vcs.xml
+
+# lint
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+lint/reports/
+
+*.hprof
+
+# Kotlin
+.kotlin/
+
+# Mac
+.DS_Store
+
