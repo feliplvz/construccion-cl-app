@@ -68,12 +68,15 @@ object FormValidator {
         }
     }
 
-    // Validar URL de imagen
+    // Validar URL de imagen (acepta URLs remotas y URIs locales de la cámara)
     fun validateImageUrl(url: String): ValidationResult {
         return when {
             url.isBlank() -> ValidationResult(false, "La URL de la imagen no puede estar vacía")
-            !url.startsWith("http://") && !url.startsWith("https://") ->
-                ValidationResult(false, "La URL debe comenzar con http:// o https://")
+            !url.startsWith("http://") &&
+            !url.startsWith("https://") &&
+            !url.startsWith("content://") &&
+            !url.startsWith("file://") ->
+                ValidationResult(false, "URL inválida. Debe ser una URL web o una imagen capturada")
             else -> ValidationResult(true)
         }
     }

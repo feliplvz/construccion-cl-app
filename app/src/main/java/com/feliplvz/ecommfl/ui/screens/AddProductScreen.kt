@@ -1,38 +1,54 @@
 package com.feliplvz.ecommfl.ui.screens
 
+import android.Manifest
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.feliplvz.ecommfl.data.model.Product
 import com.feliplvz.ecommfl.utils.FormValidator
 import com.feliplvz.ecommfl.viewmodel.ProductViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AddProductScreen(
     productViewModel: ProductViewModel,
     onBackClick: () -> Unit,
     onProductAdded: () -> Unit
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -49,6 +65,25 @@ fun AddProductScreen(
     var stockError by remember { mutableStateOf<String?>(null) }
     var categoryError by remember { mutableStateOf<String?>(null) }
     var imageError by remember { mutableStateOf<String?>(null) }
+
+    // Estado para la cámara
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Permiso de cámara
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
+
+    // Launcher para capturar foto
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && photoUri != null) {
+            imageUrl = photoUri.toString()
+            imageError = null
+            Toast.makeText(context, "Foto capturada correctamente", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "No se pudo capturar la foto", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val categories = listOf("Herramientas", "Electricidad", "Pintura", "Plomería", "Construcción", "Jardín")
     var showCategoryMenu by remember { mutableStateOf(false) }
@@ -195,15 +230,31 @@ fun AddProductScreen(
             // Botón para tomar foto
             OutlinedButton(
                 onClick = {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Función de cámara disponible - Permiso integrado")
+                    if (cameraPermissionState.status.isGranted) {
+                        // Crear archivo temporal para la foto
+                        val photoFile = createImageFile(context)
+                        photoUri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            photoFile
+                        )
+                        takePictureLauncher.launch(photoUri)
+                    } else {
+                        // Solicitar permiso
+                        cameraPermissionState.launchPermissionRequest()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Default.Build, null)
+                Icon(Icons.Default.Add, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Tomar Foto con Cámara")
+                Text(
+                    if (cameraPermissionState.status.isGranted) {
+                        "Tomar Foto con Cámara"
+                    } else {
+                        "Dar Permiso y Tomar Foto"
+                    }
+                )
             }
 
             // Preview de imagen
@@ -265,3 +316,12 @@ fun AddProductScreen(
     }
 }
 
+private fun createImageFile(context: Context): File {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir = context.getExternalFilesDir(null)
+    return File.createTempFile(
+        "JPEG_${timeStamp}_",
+        ".jpg",
+        storageDir
+    )
+}
