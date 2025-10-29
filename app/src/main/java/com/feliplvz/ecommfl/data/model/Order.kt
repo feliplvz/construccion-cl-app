@@ -8,7 +8,13 @@ data class Order(
     val totalAmount: Double,
     val items: String,
     val orderDate: Long,
-    val status: OrderStatus
+    val status: OrderStatus,
+    val customerName: String? = null,
+    val customerPhone: String? = null,
+    val customerAddress: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val locationAddress: String? = null
 )
 
 enum class OrderStatus {
@@ -23,7 +29,13 @@ fun OrderEntity.toOrder() = Order(
     totalAmount = totalAmount,
     items = items,
     orderDate = orderDate,
-    status = OrderStatus.valueOf(status)
+    status = OrderStatus.valueOf(status),
+    customerName = customerName,
+    customerPhone = customerPhone,
+    customerAddress = customerAddress,
+    latitude = latitude,
+    longitude = longitude,
+    locationAddress = locationAddress
 )
 
 fun Order.toEntity() = OrderEntity(
@@ -32,6 +44,12 @@ fun Order.toEntity() = OrderEntity(
     totalAmount = totalAmount,
     items = items,
     orderDate = orderDate,
-    status = status.name
+    status = status.name,
+    customerName = customerName,
+    customerPhone = customerPhone,
+    customerAddress = customerAddress,
+    latitude = latitude,
+    longitude = longitude,
+    locationAddress = locationAddress
 )
 

@@ -3,7 +3,9 @@ package com.feliplvz.ecommfl.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +47,7 @@ fun CheckoutScreen(
     var customerAddress by remember { mutableStateOf("") }
     var customerPhone by remember { mutableStateOf("") }
     var location by remember { mutableStateOf<Location?>(null) }
+    var locationAddress by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
     // Permisos de ubicación
@@ -106,12 +109,19 @@ fun CheckoutScreen(
                 minLines = 2
             )
 
-            // Botón para obtener ubicación (RECURSO NATIVO 1: GPS)
-            Button(
+            // Botón para obtener ubicación GPS
+            OutlinedButton(
                 onClick = {
                     if (locationPermissions.allPermissionsGranted) {
                         scope.launch {
-                            location = getLocation(context)
+                            isLoading = true
+                            val loc = getLocation(context)
+                            location = loc
+                            // Obtener dirección legible
+                            if (loc != null) {
+                                locationAddress = getAddressFromLocation(context, loc.latitude, loc.longitude)
+                            }
+                            isLoading = false
                         }
                     } else {
                         locationPermissions.launchMultiplePermissionRequest()
@@ -121,23 +131,58 @@ fun CheckoutScreen(
             ) {
                 Icon(Icons.Default.LocationOn, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Usar Mi Ubicación Actual")
+                Text(
+                    if (locationPermissions.allPermissionsGranted) {
+                        "Capturar Ubicación GPS"
+                    } else {
+                        "Dar Permiso de Ubicación"
+                    }
+                )
             }
 
+            // Mostrar ubicación capturada
             if (location != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
                     )
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            "Ubicación obtenida:",
-                            fontWeight = FontWeight.Bold
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary
                         )
-                        Text("Lat: ${location?.latitude}")
-                        Text("Lon: ${location?.longitude}")
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                "✓ Ubicación GPS capturada",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            if (locationAddress != null) {
+                                Text(
+                                    "📍 $locationAddress",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            } else {
+                                Text(
+                                    "Obteniendo dirección...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                )
+                            }
+                            Text(
+                                "Coordenadas: ${String.format(Locale.US, "%.4f", location?.latitude)}, ${String.format(Locale.US, "%.4f", location?.longitude)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
                     }
                 }
             }
@@ -196,7 +241,12 @@ fun CheckoutScreen(
                             totalAmount = cartTotal,
                             items = itemsJson,
                             orderDate = System.currentTimeMillis(),
-                            status = OrderStatus.PENDIENTE
+                            status = OrderStatus.PENDIENTE,
+                            customerName = customerName,
+                            customerPhone = customerPhone,
+                            customerAddress = customerAddress,
+                            latitude = location?.latitude,
+                            longitude = location?.longitude
                         )
 
                         orderViewModel.createOrder(order)
@@ -246,3 +296,51 @@ suspend fun getLocation(context: Context): Location? {
     }
 }
 
+// Función para obtener dirección legible desde coordenadas GPS
+@Suppress("DEPRECATION")
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun getAddressFromLocation(
+    context: Context,
+    latitude: Double,
+    longitude: Double
+): String? {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Para Android 13+ usar el API nuevo
+            kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+                geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
+                    val address = addresses.firstOrNull()
+                    val addressText = if (address != null) {
+                        buildString {
+                            address.thoroughfare?.let { append("$it ") }
+                            address.subThoroughfare?.let { append("$it, ") }
+                            address.locality?.let { append("$it, ") }
+                            address.adminArea?.let { append(it) }
+                        }.trim().ifEmpty { "Dirección obtenida" }
+                    } else {
+                        "Dirección obtenida"
+                    }
+                    continuation.resume(addressText, null)
+                }
+            }
+        } else {
+            // Para versiones antiguas
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            val address = addresses?.firstOrNull()
+            if (address != null) {
+                buildString {
+                    address.thoroughfare?.let { append("$it ") }
+                    address.subThoroughfare?.let { append("$it, ") }
+                    address.locality?.let { append("$it, ") }
+                    address.adminArea?.let { append(it) }
+                }.trim().ifEmpty { "Dirección obtenida" }
+            } else {
+                "Dirección obtenida"
+            }
+        }
+    } catch (_: Exception) {
+        null
+    }
+}
