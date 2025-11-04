@@ -119,6 +119,8 @@ fun AdminProductsList(
     onEdit: (Long) -> Unit,
     onDelete: (Product) -> Unit
 ) {
+    var productToDelete by remember { mutableStateOf<Product?>(null) }
+
     LazyColumn(
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -154,7 +156,7 @@ fun AdminProductsList(
                         IconButton(onClick = { onEdit(product.id) }) {
                             Icon(Icons.Default.Edit, "Editar")
                         }
-                        IconButton(onClick = { onDelete(product) }) {
+                        IconButton(onClick = { productToDelete = product }) {
                             Icon(
                                 Icons.Default.Delete,
                                 "Eliminar",
@@ -166,6 +168,51 @@ fun AdminProductsList(
             }
         }
     }
+
+    // Diálogo de confirmación de eliminación
+
+    productToDelete?.let { product ->
+        AlertDialog(
+            onDismissRequest = { productToDelete = null },
+            icon = {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            title = {
+                Text(
+                    text = "Eliminar Producto",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Estás seguro de que deseas eliminar el producto \"${product.name}\"?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete(product)
+                        productToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Eliminar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { productToDelete = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+            }
 }
 
 @Composable
