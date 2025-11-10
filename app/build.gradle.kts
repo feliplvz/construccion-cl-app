@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,16 +9,34 @@ plugins {
 
 android {
     namespace = "com.feliplvz.ecommfl"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.feliplvz.ecommfl"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Leer credenciales desde local.properties
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            val localProperties = Properties()
+            localPropertiesFile.inputStream().use { stream ->
+                localProperties.load(stream)
+            }
+
+            val supabaseUrl = localProperties.getProperty("SUPABASE_URL") ?: ""
+            val supabaseKey = localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""
+
+            buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+            buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseKey\"")
+        } else {
+            buildConfigField("String", "SUPABASE_URL", "\"\"")
+            buildConfigField("String", "SUPABASE_ANON_KEY", "\"\"")
+        }
     }
 
     buildTypes {
@@ -37,6 +57,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -70,6 +91,12 @@ dependencies {
 
     // Google Play Services (Ubicación)
     implementation(libs.play.services.location)
+
+    // Supabase
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:3.2.6")
+    implementation("io.github.jan-tennert.supabase:auth-kt:3.2.6")
+    implementation("io.ktor:ktor-client-android:3.3.2")
+    implementation("io.ktor:ktor-client-core:3.3.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
