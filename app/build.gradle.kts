@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -97,6 +98,9 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:auth-kt:3.2.6")
     implementation("io.ktor:ktor-client-android:3.3.2")
     implementation("io.ktor:ktor-client-core:3.3.2")
+
+    // Serialización JSON
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
