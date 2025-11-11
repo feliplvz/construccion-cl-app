@@ -3,12 +3,14 @@ package com.feliplvz.ecommfl.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.feliplvz.ecommfl.data.network.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 data class AuthState(
     val isAuthenticated: Boolean = false,
@@ -97,10 +99,10 @@ class AuthViewModel : ViewModel() {
                 supabase.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
-                    data = mapOf(
-                        "name" to name,
-                        "role" to "user"
-                    )
+                    data = buildJsonObject {
+                        put("name", name)
+                        put("role", "user")
+                    }
                 }
 
                 _authState.value = AuthState(
