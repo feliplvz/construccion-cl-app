@@ -5,12 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 android {
     namespace = "com.feliplvz.ecommfl"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.feliplvz.ecommfl"
@@ -93,14 +93,17 @@ dependencies {
     // Google Play Services (Ubicación)
     implementation(libs.play.services.location)
 
-    // Supabase
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:3.2.6")
-    implementation("io.github.jan-tennert.supabase:auth-kt:3.2.6")
-    implementation("io.ktor:ktor-client-android:3.3.2")
-    implementation("io.ktor:ktor-client-core:3.3.2")
+    // Supabase (usando BOM para gestión de versiones)
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.gotrue)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.realtime)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
 
     // Serialización JSON
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
