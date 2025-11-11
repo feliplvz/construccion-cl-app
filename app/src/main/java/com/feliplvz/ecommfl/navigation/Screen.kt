@@ -14,5 +14,8 @@ sealed class Screen(val route: String) {
     object EditProduct : Screen("edit_product/{productId}") {
         fun createRoute(productId: Long) = "edit_product/$productId"
     }
+    object Login : Screen("login")
+    object AdminLogin : Screen("admin_login")
+    object Register : Screen("register")
 }
 

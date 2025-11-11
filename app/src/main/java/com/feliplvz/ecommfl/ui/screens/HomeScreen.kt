@@ -27,7 +27,8 @@ fun HomeScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToOrders: () -> Unit,
-    onNavigateToAdmin: () -> Unit
+    onNavigateToAdmin: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     var showContent by remember { mutableStateOf(false) }
 
@@ -126,14 +127,30 @@ fun HomeScreen(
                     )
 
                     CategoryCard(
+                        icon = Icons.Default.AccountCircle,
+                        title = "Mi Cuenta",
+                        subtitle = "Ingresar",
+                        color = PrimaryBlue,
+                        delay = 400,
+                        visible = showContent,
+                        onClick = onNavigateToLogin,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CategoryCard(
                         icon = Icons.Default.Person,
                         title = "Admin",
                         subtitle = "Gestión",
                         color = SecondaryTeal,
-                        delay = 400,
+                        delay = 500,
                         visible = showContent,
                         onClick = onNavigateToAdmin,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

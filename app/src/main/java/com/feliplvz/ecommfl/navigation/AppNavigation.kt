@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.feliplvz.ecommfl.ui.screens.*
+import com.feliplvz.ecommfl.viewmodel.AuthViewModel
 import com.feliplvz.ecommfl.viewmodel.CartViewModel
 import com.feliplvz.ecommfl.viewmodel.OrderViewModel
 import com.feliplvz.ecommfl.viewmodel.ProductViewModel
@@ -17,7 +18,8 @@ fun AppNavigation(
     navController: NavHostController,
     productViewModel: ProductViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
-    orderViewModel: OrderViewModel = viewModel()
+    orderViewModel: OrderViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel()
 ) {
     NavHost(
         navController = navController,
@@ -29,7 +31,8 @@ fun AppNavigation(
                 onNavigateToProducts = { navController.navigate(Screen.ProductList.route) },
                 onNavigateToCart = { navController.navigate(Screen.Cart.route) },
                 onNavigateToOrders = { navController.navigate(Screen.OrderHistory.route) },
-                onNavigateToAdmin = { navController.navigate(Screen.AdminPanel.route) }
+                onNavigateToAdmin = { navController.navigate(Screen.AdminLogin.route) },
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) }
             )
         }
 
@@ -124,6 +127,53 @@ fun AppNavigation(
                 productViewModel = productViewModel,
                 onBackClick = { navController.popBackStack() },
                 onProductUpdated = { navController.popBackStack() }
+            )
+        }
+
+        // Login de usuarios
+        composable(Screen.Login.route) {
+            LoginScreen(
+                authViewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onLoginSuccess = {
+                    if (authViewModel.isAdmin()) {
+                        navController.navigate(Screen.AdminPanel.route) {
+                            popUpTo(Screen.Home.route)
+                        }
+                    } else {
+                        navController.navigate(Screen.OrderHistory.route) {
+                            popUpTo(Screen.Home.route)
+                        }
+                    }
+                },
+                onRegisterClick = { navController.navigate(Screen.Register.route) },
+                isAdminMode = false
+            )
+        }
+
+        // Login de admin
+        composable(Screen.AdminLogin.route) {
+            LoginScreen(
+                authViewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onLoginSuccess = {
+                    navController.navigate(Screen.AdminPanel.route) {
+                        popUpTo(Screen.Home.route)
+                    }
+                },
+                onRegisterClick = { },
+                isAdminMode = true
+            )
+        }
+
+        // Registro de usuarios
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                authViewModel = authViewModel,
+                onBackClick = { navController.popBackStack() },
+                onRegisterSuccess = {
+                    navController.popBackStack()
+                }
             )
         }
     }
