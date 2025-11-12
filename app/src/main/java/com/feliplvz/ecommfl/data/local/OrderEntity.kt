@@ -16,6 +16,7 @@ data class OrderEntity(
     val customerAddress: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val locationAddress: String? = null
+    val locationAddress: String? = null,
+    val userId: String? = null
 )
 

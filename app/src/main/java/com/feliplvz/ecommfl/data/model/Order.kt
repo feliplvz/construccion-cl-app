@@ -14,7 +14,8 @@ data class Order(
     val customerAddress: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val locationAddress: String? = null
+    val locationAddress: String? = null,
+    val userId: String? = null
 )
 
 enum class OrderStatus {
@@ -35,7 +36,8 @@ fun OrderEntity.toOrder() = Order(
     customerAddress = customerAddress,
     latitude = latitude,
     longitude = longitude,
-    locationAddress = locationAddress
+    locationAddress = locationAddress,
+    userId = userId
 )
 
 fun Order.toEntity() = OrderEntity(
@@ -50,6 +52,7 @@ fun Order.toEntity() = OrderEntity(
     customerAddress = customerAddress,
     latitude = latitude,
     longitude = longitude,
-    locationAddress = locationAddress
+    locationAddress = locationAddress,
+    userId = userId
 )
 
