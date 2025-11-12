@@ -34,9 +34,11 @@ import java.util.Locale
 fun CheckoutScreen(
     cartViewModel: CartViewModel,
     orderViewModel: OrderViewModel,
+    authViewModel: com.feliplvz.ecommfl.viewmodel.AuthViewModel,
     onBackClick: () -> Unit,
     onOrderComplete: () -> Unit
 ) {
+    val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -246,7 +248,8 @@ fun CheckoutScreen(
                             customerPhone = customerPhone,
                             customerAddress = customerAddress,
                             latitude = location?.latitude,
-                            longitude = location?.longitude
+                            longitude = location?.longitude,
+                            userId = authState.userId
                         )
 
                         orderViewModel.createOrder(order)
