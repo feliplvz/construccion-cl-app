@@ -15,6 +15,16 @@ class OrderRepository(private val orderDao: OrderDao) {
             entities.map { it.toOrder() }
         }
 
+    fun getOrdersByUserId(userId: String): Flow<List<Order>> =
+        orderDao.getOrdersByUserId(userId).map { entities ->
+            entities.map { it.toOrder() }
+        }
+
+    fun getGuestOrders(): Flow<List<Order>> =
+        orderDao.getGuestOrders().map { entities ->
+            entities.map { it.toOrder() }
+        }
+
     suspend fun createOrder(order: Order): Long {
         return orderDao.insertOrder(order.toEntity())
     }
