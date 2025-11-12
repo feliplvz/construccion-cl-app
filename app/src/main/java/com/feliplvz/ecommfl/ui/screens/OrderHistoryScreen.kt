@@ -28,9 +28,15 @@ import java.util.*
 @Composable
 fun OrderHistoryScreen(
     orderViewModel: OrderViewModel,
+    authViewModel: com.feliplvz.ecommfl.viewmodel.AuthViewModel,
     onBackClick: () -> Unit
 ) {
     val orders by orderViewModel.orders.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
+
+    LaunchedEffect(authState.userId) {
+        orderViewModel.loadOrdersForUser(authState.userId)
+    }
 
     Scaffold(
         topBar = {
