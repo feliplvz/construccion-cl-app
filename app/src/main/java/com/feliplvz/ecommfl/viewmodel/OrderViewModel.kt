@@ -19,13 +19,27 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     private val _orders = MutableStateFlow<List<Order>>(emptyList())
     val orders: StateFlow<List<Order>> = _orders.asStateFlow()
 
+    private var currentUserId: String? = null
+
     init {
         val database = AppDatabase.getDatabase(application)
         repository = OrderRepository(database.orderDao())
-        loadOrders()
     }
 
-    private fun loadOrders() {
+    fun loadOrdersForUser(userId: String?) {
+        currentUserId = userId
+        viewModelScope.launch {
+            val ordersFlow = when {
+                userId != null -> repository.getOrdersByUserId(userId)
+                else -> repository.getGuestOrders()
+            }
+            ordersFlow.collect { orderList ->
+                _orders.value = orderList
+            }
+        }
+    }
+
+    fun loadAllOrders() {
         viewModelScope.launch {
             repository.allOrders.collect { orderList ->
                 _orders.value = orderList
