@@ -32,7 +32,8 @@ fun AppNavigation(
                 onNavigateToCart = { navController.navigate(Screen.Cart.route) },
                 onNavigateToOrders = { navController.navigate(Screen.OrderHistory.route) },
                 onNavigateToAdmin = { navController.navigate(Screen.AdminLogin.route) },
-                onNavigateToLogin = { navController.navigate(Screen.Login.route) }
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                authViewModel = authViewModel
             )
         }
 
@@ -77,6 +78,7 @@ fun AppNavigation(
             CheckoutScreen(
                 cartViewModel = cartViewModel,
                 orderViewModel = orderViewModel,
+                authViewModel = authViewModel,
                 onBackClick = { navController.popBackStack() },
                 onOrderComplete = {
                     navController.navigate(Screen.OrderHistory.route) {
@@ -90,6 +92,7 @@ fun AppNavigation(
         composable(Screen.OrderHistory.route) {
             OrderHistoryScreen(
                 orderViewModel = orderViewModel,
+                authViewModel = authViewModel,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -99,6 +102,7 @@ fun AppNavigation(
             AdminPanelScreen(
                 productViewModel = productViewModel,
                 orderViewModel = orderViewModel,
+                authViewModel = authViewModel,
                 onAddProductClick = { navController.navigate(Screen.AddProduct.route) },
                 onEditProductClick = { productId ->
                     navController.navigate(Screen.EditProduct.createRoute(productId))

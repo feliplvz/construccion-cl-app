@@ -37,12 +37,14 @@ class MainActivity : ComponentActivity() {
                     val productViewModel: ProductViewModel = viewModel()
                     val cartViewModel: CartViewModel = viewModel()
                     val orderViewModel: OrderViewModel = viewModel()
+                    val authViewModel: com.feliplvz.ecommfl.viewmodel.AuthViewModel = viewModel()
 
                     AppNavigation(
                         navController = navController,
                         productViewModel = productViewModel,
                         cartViewModel = cartViewModel,
-                        orderViewModel = orderViewModel
+                        orderViewModel = orderViewModel,
+                        authViewModel = authViewModel
                     )
                 }
             }
