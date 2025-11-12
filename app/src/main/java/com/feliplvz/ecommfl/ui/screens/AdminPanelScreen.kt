@@ -35,6 +35,7 @@ import java.util.Locale
 fun AdminPanelScreen(
     productViewModel: ProductViewModel,
     orderViewModel: OrderViewModel,
+    authViewModel: com.feliplvz.ecommfl.viewmodel.AuthViewModel,
     onAddProductClick: () -> Unit,
     onEditProductClick: (Long) -> Unit,
     onBackClick: () -> Unit
@@ -42,6 +43,10 @@ fun AdminPanelScreen(
     val products by productViewModel.products.collectAsState()
     val orders by orderViewModel.orders.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        orderViewModel.loadAllOrders()
+    }
 
     Scaffold(
         topBar = {
