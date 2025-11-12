@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.feliplvz.ecommfl.ui.theme.*
+import com.feliplvz.ecommfl.viewmodel.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,8 +30,10 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToAdmin: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    authViewModel: AuthViewModel = viewModel()
 ) {
+    val authState by authViewModel.authState.collectAsState()
     var showContent by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -127,31 +131,40 @@ fun HomeScreen(
                     )
 
                     CategoryCard(
-                        icon = Icons.Default.AccountCircle,
-                        title = "Mi Cuenta",
-                        subtitle = "Ingresar",
+                        icon = if (authState.isAuthenticated) Icons.Default.ExitToApp else Icons.Default.AccountCircle,
+                        title = if (authState.isAuthenticated) "Salir" else "Mi Cuenta",
+                        subtitle = if (authState.isAuthenticated) "Cerrar sesión" else "Ingresar",
                         color = PrimaryBlue,
                         delay = 400,
                         visible = showContent,
-                        onClick = onNavigateToLogin,
+                        onClick = {
+                            if (authState.isAuthenticated) {
+                                authViewModel.signOut()
+                            } else {
+                                onNavigateToLogin()
+                            }
+                        },
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CategoryCard(
-                        icon = Icons.Default.Person,
-                        title = "Admin",
-                        subtitle = "Gestión",
-                        color = SecondaryTeal,
-                        delay = 500,
-                        visible = showContent,
-                        onClick = onNavigateToAdmin,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                // Solo mostrar Admin si el usuario es administrador
+                if (authViewModel.isAdmin()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CategoryCard(
+                            icon = Icons.Default.Person,
+                            title = "Admin",
+                            subtitle = "Gestión",
+                            color = SecondaryTeal,
+                            delay = 500,
+                            visible = showContent,
+                            onClick = onNavigateToAdmin,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 
